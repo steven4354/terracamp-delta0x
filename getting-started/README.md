@@ -1,9 +1,7 @@
-# Creating and deploying a contract
-
-### Get some devtools
+# Get some devtools
 https://docs.terra.money/contracts/tutorial/setup.html#download-localterra
 
-### Create a template (boilerplate) for contract creation
+# Create a template (boilerplate) for contract creation
 ```
 cargo generate --git https://github.com/CosmWasm/cosmwasm-template.git --branch 0.10 --name my-first-contract
 cd my-first-contract
@@ -21,7 +19,7 @@ docker run --rm -v "$(pwd)":/code \
 ```
 source: https://docs.terra.money/contracts/tutorial/implementation.html#optimizing-your-build
 
-### Now, deployment. 
+# Now, deployment. 
 
 Best process rn is using terra js to do the deployments
 video: https://youtu.be/hU5HWCL7WWc?t=3817
@@ -33,7 +31,7 @@ https://docs.terra.money/quickstart.html#create-a-new-wallet
 finding the right mainnet, testnet urls
 https://github.com/terra-money/core#node-setup
 
-### Test a deployment with spacecamp-2021-workshop folder
+# Test a deployment with spacecamp-2021-workshop folder
 
 add to your `.bash_profile` or `.zshrc`
 ```
