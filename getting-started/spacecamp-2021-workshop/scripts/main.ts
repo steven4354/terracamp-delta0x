@@ -54,31 +54,30 @@ let terraswapLpToken: string;
 //----------------------------------------------------------------------------------------
 
 async function setupTest() {
-  // Step 1. Upload TerraSwap Token code
-  process.stdout.write("Uploading TerraSwap Token code... ");
+  // Step 1. Upload Terra contract code
+  process.stdout.write("Uploading Terra smart contract code... ");
 
   const cw20CodeId = await storeCode(
     terra,
     deployer,
-    path.resolve(__dirname, "../artifacts/terraswap_token.wasm")
+    path.resolve(__dirname, "../artifacts/my_first_contract.wasm")
   );
 
   console.log(chalk.green("Done!"), `${chalk.blue("codeId")}=${cw20CodeId}`);
 
-  // Step 2. Instantiate TerraSwap Token contract
-  process.stdout.write("Instantiating TerraSwap Token contract... ");
+  // Step 2. Instantiate Terra contract code
+  process.stdout.write("Instantiating Terra smart contract... ");
 
-  const tokenResult = await instantiateContract(terra, deployer, deployer, cw20CodeId, {
-    name: "Mock Mirror Token",
-    symbol: "MIR",
-    decimals: 6,
-    initial_balances: [],
-    mint: {
-      minter: deployer.key.accAddress,
-    },
+  const contractResult = await instantiateContract(terra, deployer, deployer, cw20CodeId, {
+    "count": 0
   });
 
-  mirrorToken = tokenResult.logs[0].events[0].attributes[3].value;
+  console.log("STEVENDEBUG")
+  console.log(contractResult)
+
+  return
+
+  mirrorToken = contractResult.logs[0].events[0].attributes[3].value;
 
   console.log(chalk.green("Done!"), `${chalk.blue("contractAddress")}=${mirrorToken}`);
 
