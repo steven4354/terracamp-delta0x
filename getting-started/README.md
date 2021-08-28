@@ -1,7 +1,7 @@
-# Get some devtools
+# Get some devtools.
 https://docs.terra.money/contracts/tutorial/setup.html#download-localterra
 
-# Create a template (boilerplate) for contract creation
+# Create a template (boilerplate) for contract creation.
 
 note: cosmwasm version 0.10 works with tequila testnet (columbus-4), newer versions will only work with bombay testnet (columbus-5)
 

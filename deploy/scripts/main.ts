@@ -9,16 +9,17 @@ import * as fs from "fs";
 
 (async () => {
   try {
-    // test1 key from localterra accounts
     const mk = new MnemonicKey({
       mnemonic: process.env.TERRA_MNEMOMIC_KEY,
     });
 
+    // Old local terra deployment format
     // connect to localterra
     // const terra = new LCDClient({
     //   URL: 'http://localhost:1317',
     //   chainID: 'localterra'
     // })
+
     const terra = new LCDClient({
       chainID: "tequila-0004",
       URL: "https://tequila-lcd.terra.dev",
@@ -47,20 +48,9 @@ import * as fs from "fs";
       store_code: { code_id },
     } = storeCodeTxResult.logs[0].eventsByType;
 
-    console.log("STEVENDEBUG code_id", typeof code_id);
+    console.log("STEVENDEBUG code_id", code_id);
 
     const code_id_num = Number.parseFloat(code_id[0]);
-
-    console.log("STEVENDEBUG code_id", typeof code_id_num);
-    console.log("STEVENDEBUG code_id", code_id_num.toFixed());
-
-    //   wallet.key.accAddress,
-    //   wallet.key.accAddress,
-    //   code_id_num, // code ID
-    //   {reset: {
-    //     count: 5
-    //   }}, // InitMsg
-    //   { uluna: 10000000, ukrw: 1000000 }, // init coins
 
     const instantiate = new MsgInstantiateContract(
       wallet.key.accAddress,
