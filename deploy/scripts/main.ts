@@ -66,11 +66,9 @@ import * as fs from "fs";
       wallet.key.accAddress,
       code_id_num,
       {
-        reset: {
-          count: 5,
-        },
+        count: 5,
       },
-      { uluna: 10000000, ukrw: 1000000 } // init coins
+      { uluna: 100, ukrw: 100 } // init coins
     );
 
     console.log("STEVENDEBUG instantiate", instantiate);
