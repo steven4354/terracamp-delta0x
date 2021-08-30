@@ -3,10 +3,14 @@
   "title": "State",
   "type": "object",
   "required": [
+    "anchor_contract_addr",
     "count",
     "owner"
   ],
   "properties": {
+    "anchor_contract_addr": {
+      "$ref": "#/definitions/HumanAddr"
+    },
     "count": {
       "type": "integer",
       "format": "int32"
@@ -22,6 +26,9 @@
     },
     "CanonicalAddr": {
       "$ref": "#/definitions/Binary"
+    },
+    "HumanAddr": {
+      "type": "string"
     }
   }
 }

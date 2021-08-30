@@ -43,6 +43,30 @@
           "type": "object"
         }
       }
+    },
+    {
+      "type": "object",
+      "required": [
+        "withdraw"
+      ],
+      "properties": {
+        "withdraw": {
+          "type": "object",
+          "required": [
+            "withdraw_amount"
+          ],
+          "properties": {
+            "withdraw_amount": {
+              "$ref": "#/definitions/Uint128"
+            }
+          }
+        }
+      }
     }
-  ]
+  ],
+  "definitions": {
+    "Uint128": {
+      "type": "string"
+    }
+  }
 }

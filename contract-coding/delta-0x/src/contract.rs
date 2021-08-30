@@ -7,15 +7,21 @@ use cosmwasm_std::{
 use crate::msg::{CountResponse, HandleMsg, AnchorHandleMsg, InitMsg, QueryMsg};
 use crate::state::{config, config_read, State};
 use moneymarket::querier::{deduct_tax, query_balance, query_supply};
+// copied from: https://github.com/Anchor-Protocol/money-market-contracts/blob/main/contracts/market/src/contract.rs
+use moneymarket::market::{ Cw20HookMsg, HandleMsg as AnchorMarketHandleMsg };
+use cw20::{Cw20CoinHuman, Cw20ReceiveMsg, MinterResponse};
 
 pub fn init<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: Env,
     msg: InitMsg,
 ) -> StdResult<InitResponse> {
+    // TODO: add a function to update anchor smart contract address
+    // contract_addr from https://docs.anchorprotocol.com/smart-contracts/deployed-contracts
     let state = State {
         count: msg.count,
         owner: deps.api.canonical_address(&env.message.sender)?,
+        anchor_contract_addr: HumanAddr("terra15dwd5mj8v59wpj0wvt233mf5efdff808c5tkal".to_string())
     };
 
     config(&mut deps.storage).save(&state)?;
@@ -26,16 +32,7 @@ pub fn init<S: Storage, A: Api, Q: Querier>(
 pub fn try_deposit<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: Env,
-    // count: i32,
 ) -> StdResult<HandleResponse> {
-    // let api = &deps.api;
-    // config(&mut deps.storage).update(|mut state| {
-    //     if api.canonical_address(&env.message.sender)? != state.owner {
-    //         return Err(StdError::unauthorized());
-    //     }
-    //     state.count = count;
-    //     Ok(state)
-    // })?;
     let state = config_read(&deps.storage).load()?;
 
     let deposit_amount: Uint128 = env
@@ -54,12 +51,10 @@ pub fn try_deposit<S: Storage, A: Api, Q: Querier>(
         )));
     }
 
-    // TODO: add a function to update anchor smart contract address
-    // contract_addr from https://docs.anchorprotocol.com/smart-contracts/deployed-contracts
-    let msg = AnchorHandleMsg::DepositStable {};
-
+    // https://github.com/Anchor-Protocol/money-market-contracts/blob/main/contracts/market/src/contract.rs
+    let msg = AnchorHandleMsg::DepositStable{};
     let exec = WasmMsg::Execute {
-        contract_addr: HumanAddr("terra15dwd5mj8v59wpj0wvt233mf5efdff808c5tkal".to_string()),
+        contract_addr: state.anchor_contract_addr,
         msg: to_binary(&msg)?,
         send: vec![deduct_tax(&deps, Coin {
             denom: "uusd".to_string(),
@@ -101,6 +96,59 @@ pub fn try_deposit<S: Storage, A: Api, Q: Querier>(
     // Ok(HandleResponse::default())
 }
 
+pub fn try_withdraw<S: Storage, A: Api, Q: Querier>(
+    deps: &mut Extern<S, A, Q>,
+    env: Env,
+    withdraw_amount: Uint128,
+    // count: i32,
+) -> StdResult<HandleResponse> {
+    let state = config_read(&deps.storage).load()?;
+
+    // let msg = BankQuery::Balance {
+    //     address: &env.contract.address,
+    //     denom: "aust",
+    // }
+    // let exec = WasmMsg::Execute {
+    //     contract_addr: state.anchor_contract_addr,
+    //     msg: to_binary(&msg)?,
+    //     send: vec![deduct_tax(&deps, Coin {
+    //         denom: "uusd".to_string(),
+    //         amount: deposit_amount ,
+    //     })?],
+    // };
+
+    // Ok(HandleResponse {
+    //     messages: vec![CosmosMsg::Wasm(exec)],
+    //     data: None,
+    //     log: vec![],
+    // })
+
+    // turn aUST back to UST
+    // from: https://github.com/Anchor-Protocol/money-market-contracts/blob/main/contracts/market/src/contract.rs
+    // https://github.com/Anchor-Protocol/money-market-contracts/blob/c13fb636c925e66e6470882d6eefb6fec7d64091/contracts/market/src/testing/tests.rs#L714
+    let redeemStableMsg = Cw20HookMsg::RedeemStable {};
+    let msg = AnchorMarketHandleMsg::Receive(
+        Cw20ReceiveMsg{
+            sender: env.contract.address,
+            amount: withdraw_amount,
+            msg: Some(to_binary(&redeemStableMsg).unwrap())
+        }
+    );
+    let exec = WasmMsg::Execute {
+        contract_addr: state.anchor_contract_addr,
+        msg: to_binary(&msg)?,
+        send: vec![],
+    };
+
+    // send back tokens: https://github.com/Anchor-Protocol/money-market-contracts/blob/c13fb636c925e66e6470882d6eefb6fec7d64091/contracts/market/src/testing/tests.rs#L739
+
+    Ok(HandleResponse {
+        messages: vec![CosmosMsg::Wasm(exec)],
+        data: None,
+        log: vec![],
+    })
+}
+
 pub fn handle<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: Env,
@@ -109,7 +157,8 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
     match msg {
         HandleMsg::Increment {} => try_increment(deps, env),
         HandleMsg::Reset { count } => try_reset(deps, env, count),
-        HandleMsg::Deposit {} => try_deposit(deps, env)
+        HandleMsg::Deposit {} => try_deposit(deps, env),
+        HandleMsg::Withdraw { withdraw_amount } => try_withdraw(deps, env, withdraw_amount),
     }
 }
 

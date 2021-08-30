@@ -10,21 +10,14 @@ import {
 } from "@terra-money/terra.js";
 import * as fs from "fs";
 
-const DEPLOYED_DELTA0X_ADDR = "terra1w43tx8xfp92pxs45e2r2nxsx4dy0tq4gk2z6sf";
-// https://finder.terra.money/tequila-0004/address/terra1w43tx8xfp92pxs45e2r2nxsx4dy0tq4gk2z6sf
+const DEPLOYED_DELTA0X_ADDR = "terra1348jqg48gsesdx66ha6zcgp2hpcamjju5fh4zl";
+// https://finder.terra.money/tequila-0004/address/terra1348jqg48gsesdx66ha6zcgp2hpcamjju5fh4zl
 
 (async () => {
   try {
     const mk = new MnemonicKey({
       mnemonic: process.env.TERRA_MNEMOMIC_KEY,
     });
-
-    // Old local terra deployment format
-    // connect to localterra
-    // const terra = new LCDClient({
-    //   URL: 'http://localhost:1317',
-    //   chainID: 'localterra'
-    // })
 
     const terra = new LCDClient({
       chainID: "tequila-0004",
@@ -33,13 +26,14 @@ const DEPLOYED_DELTA0X_ADDR = "terra1w43tx8xfp92pxs45e2r2nxsx4dy0tq4gk2z6sf";
 
     const wallet = terra.wallet(mk);
 
+    // deposit
     const deposit = new MsgExecuteContract(
       wallet.key.accAddress,
       DEPLOYED_DELTA0X_ADDR,
       {
         deposit: {},
       },
-      { uusd: 10000 } // init coins
+      { uusd: 10000, ukrw: 10000 } // init coins
     );
     const depositTx = await wallet.createAndSignTx({
       msgs: [deposit],
@@ -47,25 +41,22 @@ const DEPLOYED_DELTA0X_ADDR = "terra1w43tx8xfp92pxs45e2r2nxsx4dy0tq4gk2z6sf";
     const depositTxResult = await terra.tx.broadcast(depositTx);
     console.log("STEVENDEBUG depositTxResult ", depositTxResult);
 
-    /*
-    [
-        {
-        "msg_index":0,
-        "log":"",
-        "events":[{
-            "type":"execute_contract",
-            "attributes":[{
-                "key":"sender",
-                "value":"terra1pk90dep5axrqcj9pj0vm7ted6pcz3t9d5vhpph"
-            },{
-                "key":"contract_address",
-                "value":"terra1q8w3qe44dzus9ew84qpjq4dnzg5j734gx0az07"
-            }]},{
-                "type":"message",
-                "attributes":[{"key":"action","value":"execute_contract"},
-            {"key":"module","value":"wasm"},{"key":"sender",
-            "value":"terra1pk90dep5axrqcj9pj0vm7ted6pcz3t9d5vhpph"}]}]}]
-    */
+    // withdraw
+    const withdraw = new MsgExecuteContract(
+      wallet.key.accAddress,
+      DEPLOYED_DELTA0X_ADDR,
+      {
+        withdraw: {
+          withdraw_amount: "100"
+        },
+      },
+    );
+    const withdrawTx = await wallet.createAndSignTx({
+      msgs: [withdraw],
+    });
+    const withdrawTxResult = await terra.tx.broadcast(withdrawTx);
+    console.log("STEVENDEBUG withdrawTxResult ", withdrawTxResult);
+
   } catch (e) {
     console.log("STEVENDEBUG error ", e);
   }

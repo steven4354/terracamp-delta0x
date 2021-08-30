@@ -42,3 +42,13 @@ cargo schema
 Copy the .wasm file in `/Users/stevenli/Documents/github/terracamp-delta0x/contract-coding/cosmwasm-examples/escrow/artifacts` to the `../deploy/artifacts` folder
 
 Update the `escrow_deploy.ts` script with the right msg (figure it out from the `/schema` folder)  & deploy
+
+# Starting a new contract
+
+Use the command
+
+```
+cargo generate --git https://github.com/CosmWasm/cosmwasm-template.git --branch 0.10 --name contract-name
+```
+
+Then, search around github/google to copy & paste. To test just `cargo wasm` & optimize and use a deploy script to test functions

@@ -1,5 +1,8 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use cosmwasm_std::{
+    Uint128,
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InitMsg {
@@ -12,6 +15,7 @@ pub enum HandleMsg {
     Increment {},
     Reset { count: i32 },
     Deposit {},
+    Withdraw { withdraw_amount: Uint128 }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
