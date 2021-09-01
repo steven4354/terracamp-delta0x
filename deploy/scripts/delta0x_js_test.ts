@@ -1,5 +1,6 @@
 import { int, LCDClient, MnemonicKey, StdTx } from "@terra-money/terra.js";
 import { Mirror } from "@mirror-protocol/mirror.js";
+import { Anchor, columbus4, AddressProviderFromJson, MARKET_DENOMS, OperationGasParameters } from '@anchor-protocol/anchor.js'
 
 // testing using mainnet
 (async () => {
@@ -13,14 +14,25 @@ import { Mirror } from "@mirror-protocol/mirror.js";
       mnemonic: process.env.TERRA_MNEMOMIC_KEY,
     });
 
+    const wallet = terra.wallet(mk);
+
     const mirror = new Mirror({
       key: mk,
     });
 
-    const result = await mirror.factory.getConfig();
-    console.log("STEVENDEBUG result ", result);
+    const addressProvider = new AddressProviderFromJson(columbus4)
+    const anchor = new Anchor(terra, addressProvider)
 
-    const wallet = terra.wallet(mk);
+    // deposit ust to anchor to get aust
+    // source: https://github.com/Anchor-Protocol/anchor.js/blob/a4b3da7282cfc0e670af44978fda9505b5833dcd/src/__tests__/anchor-money-market-test.ts#L263
+    const depositStableMsg = anchor.earn.depositStable({
+        market: MARKET_DENOMS.UUSD,
+        amount: '1000',
+      }).generateWithWallet(wallet)
+
+    console.log("STEVENDEBUG depositStableMsg ", depositStableMsg);
+    return
+    
 
     const positionIdx = await mirror.mint.getNextPositionIdx();
     const currentPositions = await mirror.mint.getPositions(mk.accAddress);
